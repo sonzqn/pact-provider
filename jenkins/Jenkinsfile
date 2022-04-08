@@ -15,7 +15,7 @@ pipeline {
         sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
         dir('pact/bin') {
           script {
-            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l prod | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           }
         }
         echo "Current prod version: " + PROD_VERSION
@@ -25,9 +25,9 @@ pipeline {
       steps {
         script {
           if (env.PROD_VERSION == 'Pacticipant version not found') {
-            env.TAG_PROVIDER = 'prod'
+            env.TAG_PROVIDER = 'SIT'
           } else {
-            env.TAG_PROVIDER = 'sit'
+            env.TAG_PROVIDER = env.GIT_BRANCH
           }
           sh "mvn clean verify " +
                "-Dpact.provider.version=${GIT_COMMIT} " +
