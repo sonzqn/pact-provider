@@ -8,6 +8,10 @@ pipeline {
     maven 'vmn 3.8'
   }
 
+  environment {
+    BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
+  }
+
   stages {
     stage ('Get Latest Prod Version From Pact Broker') {
       steps {
@@ -43,14 +47,18 @@ pipeline {
         }
       }
     }
-    stage('Deploy') {
+    stage('Tag as verified on SIT') {
       when {
-        branch 'master'
+        expression { return env.PROD_VERSION != 'Pacticipant version not found'; }
       }
       steps {
-        echo 'Deploying to prod now...'
+        script {
+          sh "mvn clean verify " +
+               "-Dpact.provider.version=${GIT_COMMIT} " +
+               "-Dpact.verifier.publishResults=true " +
+               "-Dpact.provider.tag=SIT"
+        }
       }
     }
   }
-
 }
