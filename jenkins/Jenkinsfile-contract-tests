@@ -20,7 +20,7 @@ pipeline {
         sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
         dir('pact/bin') {
           script {
-            env.SIT_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+            env.SIT_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l VP_SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           }
         }
         echo "Current SIT version: " + SIT_VERSION
@@ -38,7 +38,7 @@ pipeline {
                 "-Dpact.provider.version=${GIT_COMMIT} " +
                 "-Dpact.verifier.publishResults=true " +
                 "-Dpactbroker.consumers=${params.pactConsumerName} " +
-                "-Dpact.provider.tag=SIT,${params.pactConsumerTags}"
+                "-Dpact.provider.tag=VP_SIT,${params.pactConsumerTags}"
       }
     }
   }
