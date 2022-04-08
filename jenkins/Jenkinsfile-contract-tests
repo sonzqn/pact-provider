@@ -1,0 +1,48 @@
+#!groovy
+pipeline {
+
+  agent any
+
+  tools {
+    jdk 'jdk 8'
+    maven 'vmn 3.8'
+  }
+
+  parameters {
+    string(name: 'pactConsumerName', defaultValue: '', description: 'Name of consumer to verify')
+    string(name: 'pactConsumerTags', defaultValue: 'master', description: 'Tags to verify')
+  }
+
+  stages {
+    stage ('Get Latest Prod Version From Pact Broker') {
+      steps {
+        sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.88.83/pact-1.88.83-linux-x86_64.tar.gz'
+        sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
+        dir('pact/bin') {
+          script {
+            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l prod | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+          }
+        }
+        echo "Current prod version: " + PROD_VERSION
+      }
+    }
+    stage("Checkout Latest Prod Version") {
+      steps {
+        sh "git checkout ${PROD_VERSION}"
+      }
+    }
+
+    stage ('Run Contract Tests') {
+      steps {
+        dir('product-service') {
+          sh "mvn clean verify " +
+                  "-Dpact.provider.version=${GIT_COMMIT} " +
+                  "-Dpact.verifier.publishResults=true " +
+                  "-Dpactbroker.consumers=${params.pactConsumerName}" +
+                  "-Dpact.provider.tag=prod,${params.pactConsumerTags}"
+        }
+      }
+    }
+  }
+
+}
