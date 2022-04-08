@@ -47,7 +47,7 @@ pipeline {
     stage('Can I deploy on SIT') {
       steps {
         dir('pact/bin') {
-          sh "./pact-broker can-i-deploy -a provider-x -b http://localhost:9292 -e ${GIT_COMMIT} --to SIT"
+          sh "./pact-broker can-i-deploy -a provider-x -b http://localhost:9292 -e ${GIT_COMMIT} --to VC_SIT"
         }
       }
     }
