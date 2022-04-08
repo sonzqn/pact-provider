@@ -8,6 +8,10 @@ pipeline {
     maven 'vmn 3.8'
   }
 
+  parameters {
+    string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to build')
+  }
+
   environment {
     BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
   }
