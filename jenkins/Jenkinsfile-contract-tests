@@ -37,7 +37,7 @@ pipeline {
         sh "mvn clean verify " +
                 "-Dpact.provider.version=${GIT_COMMIT} " +
                 "-Dpact.verifier.publishResults=true " +
-                "-Dpactbroker.consumers=${params.pactConsumerName}" +
+                "-Dpactbroker.consumers=${params.pactConsumerName} " +
                 "-Dpact.provider.tag=SIT,${params.pactConsumerTags}"
       }
     }
