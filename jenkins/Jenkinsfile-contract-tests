@@ -9,6 +9,7 @@ pipeline {
   }
 
   parameters {
+    string(name: 'PROVIDER_TAG', defaultValue: 'SIT', description: 'Tag needs to verify')
     string(name: 'pactConsumerName', defaultValue: '', description: 'Name of consumer to verify')
     string(name: 'pactConsumerTags', defaultValue: 'master', description: 'Tags to verify')
   }
