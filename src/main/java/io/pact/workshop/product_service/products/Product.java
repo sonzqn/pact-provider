@@ -17,5 +17,5 @@ public class Product {
   private String name;
   private String type;
   private String version;
-  private String code;
+  private String qrcode;
 }
