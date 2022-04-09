@@ -11,31 +11,32 @@ pipeline {
   parameters {
     string(name: 'pactConsumerName', defaultValue: '', description: 'Name of consumer to verify')
     string(name: 'pactConsumerTags', defaultValue: 'master', description: 'Tags to verify')
+    string(name: 'PROVIDER_TAG', defaultValue: 'SIT_ENV', description: 'Tags to verify')
   }
 
   stages {
-    stage ('Get Latest SIT Version From Pact Broker') {
+    stage ('Get Latest Provider by Tag From Pact Broker') {
       steps {
         sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.88.83/pact-1.88.83-linux-x86_64.tar.gz'
         sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
         dir('pact/bin') {
           script {
-            env.SIT_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l SIT_ENV | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+            env.PROVIDER_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l ${PROVIDER_TAG} | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           }
         }
-        echo "Current SIT version: " + SIT_VERSION
+        echo "Current " + PROVIDER_TAG + " version: " + PROVIDER_VERSION
       }
     }
-    stage("Checkout Latest SIT Version") {
+    stage("Checkout Latest Provider (Tag)") {
       steps {
-        sh "git checkout ${SIT_VERSION}"
+        sh "git checkout ${PROVIDER_VERSION}"
       }
     }
 
     stage ('Run Contract Tests') {
       steps {
         sh "mvn clean verify " +
-                "-Dpact.provider.version=${SIT_VERSION} " +
+                "-Dpact.provider.version=${PROVIDER_VERSION} " +
                 "-Dpact.verifier.publishResults=true " +
                 "-Dpactbroker.consumers=${params.pactConsumerName} " +
                 "-Dpactbroker.consumerversionselectors.tags=${params.pactConsumerTags} " +
@@ -43,5 +44,4 @@ pipeline {
       }
     }
   }
-
 }
