@@ -63,7 +63,7 @@ pipeline {
       }
       steps {
         dir('pact/bin') {
-            sh "./pact-broker record-release --environment=SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT} -b ${PACT_BROKER_URL}"
+            sh "./pact-broker record-deployment --environment=SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT} -b ${PACT_BROKER_URL}"
         }
       }
     }
