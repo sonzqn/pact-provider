@@ -21,7 +21,7 @@ pipeline {
   stages {
     stage ('Build & Test') {
       steps {
-          sh "mvn clean verify -Dpactbroker.consumerversionselectors.tags=SIT -Dpact.provider.version=${GIT_COMMIT} -Dpact.provider.tag=${GIT_BRANCH} -Dpact.verifier.publishResults=true"
+          sh "mvn clean verify -Dpactbroker.consumerversionselectors.tags=SIT_ENV -Dpact.provider.version=${GIT_COMMIT} -Dpact.provider.tag=${GIT_BRANCH} -Dpact.verifier.publishResults=true"
       }
     }
     stage ('Get Latest SIT Version From Pact Broker') {
@@ -30,7 +30,7 @@ pipeline {
         sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
         dir('pact/bin') {
           script {
-            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -l SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -l SIT_ENV | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           }
         }
         echo "Current prod version: " + PROD_VERSION
@@ -42,17 +42,17 @@ pipeline {
           script {
             //Tag the first pass contract as verified on SIT
             if (env.PROD_VERSION == 'Pacticipant version not found') {
-              sh "./pact-broker create-version-tag -t SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT} -b ${PACT_BROKER_URL}"
+              sh "./pact-broker create-version-tag -t SIT_ENV -a ${SERVICE_NAME} -e ${GIT_COMMIT} -b ${PACT_BROKER_URL}"
             }
           }
-          sh "./pact-broker can-i-deploy -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} --to SIT"
+          sh "./pact-broker can-i-deploy -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} --to SIT_ENV"
         }
       }
     }
     stage('Mark as verified on SIT') {
       steps {
         dir('pact/bin') {
-          sh "./pact-broker create-version-tag -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} -t SIT"
+          sh "./pact-broker create-version-tag -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} -t SIT_ENV"
           sh "./pact-broker record-release --environment=SIT -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT}"
         }
       }
