@@ -35,7 +35,7 @@ pipeline {
     stage ('Run Contract Tests') {
       steps {
         sh "mvn clean verify " +
-                "-Dpact.provider.version=${GIT_COMMIT} " +
+                "-Dpact.provider.version=${SIT_VERSION} " +
                 "-Dpact.verifier.publishResults=true " +
                 "-Dpactbroker.consumers=${params.pactConsumerName} " +
                 "-Dpactbroker.consumerversionselectors.tags=${params.pactConsumerTags} " +
