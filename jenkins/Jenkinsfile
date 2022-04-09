@@ -59,7 +59,7 @@ pipeline {
 
     stage('Deploy on SIT') {
       when {
-        expression { return params.BRANCH_NAME == 'master'; }
+        expression { return env.BRANCH_NAME == 'master'; }
       }
       steps {
         dir('pact/bin') {
