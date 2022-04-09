@@ -16,5 +16,5 @@ public class Product {
   private Long id;
   private String name;
   private String type;
-  private String code;
+  private String tag;
 }
