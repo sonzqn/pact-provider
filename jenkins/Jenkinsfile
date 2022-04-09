@@ -13,54 +13,47 @@ pipeline {
   }
 
   environment {
-    BRANCH_NAME=env.GIT_BRANCH.replace("origin/", "")
+    SERVICE_NAME = "provider-x"
+    BRANCH_NAME = env.GIT_BRANCH.replace("origin/", "")
+    PACT_BROKER_URL = "http://localhost:9292"
   }
 
   stages {
+    stage ('Build & Test') {
+      steps {
+          sh "mvn clean verify -Dpactbroker.consumerversionselectors.tags=SIT -Dpact.provider.version=${GIT_COMMIT} -Dpact.provider.tag=${GIT_BRANCH} -Dpact.verifier.publishResults=true"
+      }
+    }
     stage ('Get Latest SIT Version From Pact Broker') {
       steps {
         sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.88.83/pact-1.88.83-linux-x86_64.tar.gz'
         sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
         dir('pact/bin') {
           script {
-            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l VP_SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+            env.PROD_VERSION = sh(script: "./pact-broker describe-version -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -l SIT | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           }
         }
         echo "Current prod version: " + PROD_VERSION
       }
     }
-    stage ('Build & Test') {
-      steps {
-        script {
-          if (env.PROD_VERSION == 'Pacticipant version not found') {
-            env.TAG_PROVIDER = 'VP_SIT'
-          } else {
-            env.TAG_PROVIDER = env.GIT_BRANCH
-          }
-          sh "mvn clean verify " +
-               "-Dpact.provider.version=${GIT_COMMIT} " +
-               "-Dpact.verifier.publishResults=true " +
-               "-Dpact.provider.tag=${TAG_PROVIDER}"
-        }
-      }
-    }
     stage('Can I deploy on SIT') {
       steps {
         dir('pact/bin') {
-          sh "./pact-broker can-i-deploy -a provider-x -b http://localhost:9292 -e ${GIT_COMMIT} --to-environment SIT"
+          script {
+            //Tag the first pass contract as verified on SIT
+            if (env.PROD_VERSION == 'Pacticipant version not found') {
+              sh "./pact-broker create-version-tag -t SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT} -b ${PACT_BROKER_URL}"
+            }
+          }
+          sh "./pact-broker can-i-deploy -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} --to SIT"
         }
       }
     }
-    stage('Tag as verified on SIT') {
-      when {
-        expression { return env.PROD_VERSION != 'Pacticipant version not found'; }
-      }
+    stage('Mark as verified on SIT') {
       steps {
-        script {
-          sh "mvn clean verify " +
-               "-Dpact.provider.version=${GIT_COMMIT} " +
-               "-Dpact.verifier.publishResults=true " +
-               "-Dpact.provider.tag=VP_SIT"
+        dir('pact/bin') {
+          sh "./pact-broker create-version-tag -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT} -t SIT"
+          sh "./pact-broker record-release --environment=SIT -a ${SERVICE_NAME} -b ${PACT_BROKER_URL} -e ${GIT_COMMIT}"
         }
       }
     }
