@@ -26,9 +26,7 @@ import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Provider("provider-x")
-@PactBroker(consumerVersionSelectors = {
-        @VersionSelector(tag = "SIT")
-})
+@PactBroker
 public class PactVerificationTest {
     @LocalServerPort
     private int port;

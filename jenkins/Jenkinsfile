@@ -21,7 +21,7 @@ pipeline {
   stages {
     stage ('Build & Test') {
       steps {
-          sh "mvn clean verify -Dpactbroker.consumerversionselectors.tags=SIT_ENV -Dpact.provider.version=${GIT_COMMIT} -Dpact.provider.tag=${GIT_BRANCH} -Dpact.verifier.publishResults=true"
+          sh "mvn clean verify -Dpactbroker.consumerversionselectors.tags=SIT_ENV -Dpact.provider.version=${GIT_COMMIT} -Dpact.provider.tag=${BRANCH_NAME} -Dpact.verifier.publishResults=true"
       }
     }
     stage ('Get Latest SIT Version From Pact Broker') {
