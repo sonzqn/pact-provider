@@ -16,7 +16,6 @@ pipeline {
     SERVICE_NAME = "provider-x"
     BRANCH_NAME = env.GIT_BRANCH.replace("origin/", "")
     PACT_URL = "http://localhost:9292"
-    PACT_URL = "http://localhost:9292"
     PACT_DOCKER_CLI = "--network host --rm pactfoundation/pact-cli:0.50.0.21 broker -b ${PACT_URL}"
     //PACT_FOLDER = env.WORKSPACE for real jenkins (non docker)
     PACT_FOLDER = env.WORKSPACE.replace("var", "/home/sonnd4/Documents/GitHub/infrastructure/jenkins")
