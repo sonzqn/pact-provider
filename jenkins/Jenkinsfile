@@ -16,10 +16,11 @@ pipeline {
     SERVICE_NAME = "provider-x"
     BRANCH_NAME = env.GIT_BRANCH.replace("origin/", "")
     PACT_URL = "http://localhost:9292"
-    PACT_DOCKER_CLI = "--network host --rm pactfoundation/pact-cli:0.50.0.21 broker -b ${PACT_URL}"
-    //PACT_FOLDER = env.WORKSPACE for real jenkins (non docker)
-    PACT_FOLDER = env.WORKSPACE.replace("var", "/home/sonnd4/Documents/GitHub/infrastructure/jenkins")
-    PACT_RETRY_OPTION = "--retry-while-unknown=4 --retry-interval=10"
+    PACT_DOCKER_CLI = "sudo docker run \
+                           -e PACT_BROKER_BASE_URL='http://localhost:9292' \
+                           -e PACT_BROKER_USERNAME='pb_username' \
+                           -e PACT_BROKER_PASSWORD='pb_password' \
+                           --network host --rm pactfoundation/pact-cli:0.50.0.21 broker"
   }
 
   stages {
@@ -31,23 +32,23 @@ pipeline {
     stage('[Pact] Version & Tag Init') {
       steps {
         script {
-          env.SIT_VERSION = sh(script: "sudo docker run ${PACT_DOCKER_CLI} describe-version -a ${SERVICE_NAME} -l SIT_ENV | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+          env.SIT_VERSION = sh(script: "${PACT_DOCKER_CLI} describe-version -a ${SERVICE_NAME} -l SIT_ENV | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
           echo "Latest verified SIT version: " + SIT_VERSION
           if (env.SIT_VERSION == 'Pacticipant version not found' && env.BRANCH_NAME == 'master') {
-            sh "sudo docker run ${PACT_DOCKER_CLI} create-or-update-pacticipant --name=${SERVICE_NAME} --main-branch=${BRANCH_NAME} --repository-url=${GIT_URL}"
-            sh "sudo docker run ${PACT_DOCKER_CLI} create-version-tag -t SIT_ENV -a ${SERVICE_NAME} -e ${GIT_COMMIT}"
+            sh "${PACT_DOCKER_CLI} create-or-update-pacticipant --name=${SERVICE_NAME} --main-branch=${BRANCH_NAME} --repository-url=${GIT_URL}"
+            sh "${PACT_DOCKER_CLI} create-version-tag -t SIT_ENV -a ${SERVICE_NAME} -e ${GIT_COMMIT}"
           }
         }
       }
     }
     stage('Can I deploy on SIT') {
       steps {
-        sh "sudo docker run ${PACT_DOCKER_CLI} can-i-deploy -a ${SERVICE_NAME} -e ${GIT_COMMIT} --to SIT_ENV"
+        sh "${PACT_DOCKER_CLI} can-i-deploy -a ${SERVICE_NAME} -e ${GIT_COMMIT} --to SIT_ENV"
       }
     }
     stage('Mark as verified on SIT') {
       steps {
-        sh "sudo docker run ${PACT_DOCKER_CLI} create-version-tag -a ${SERVICE_NAME} -e ${GIT_COMMIT} -t SIT_ENV"
+        sh "${PACT_DOCKER_CLI} create-version-tag -a ${SERVICE_NAME} -e ${GIT_COMMIT} -t SIT_ENV"
       }
     }
     stage('Deploy on SIT') {
@@ -55,7 +56,7 @@ pipeline {
         expression { return env.BRANCH_NAME == 'master'; }
       }
       steps {
-          sh "sudo docker run ${PACT_DOCKER_CLI} record-deployment --environment=SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT}"
+          sh "${PACT_DOCKER_CLI} record-deployment --environment=SIT -a ${SERVICE_NAME} -e ${GIT_COMMIT}"
       }
     }
   }

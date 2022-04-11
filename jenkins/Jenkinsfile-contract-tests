@@ -15,15 +15,18 @@ pipeline {
   }
 
   environment {
-    PACT_URL = "http://localhost:9292"
-    PACT_DOCKER_CLI = "--network host --rm pactfoundation/pact-cli:0.50.0.21 broker -b ${PACT_URL}"
+    PACT_DOCKER_CLI = "sudo docker run \
+                           -e PACT_BROKER_BASE_URL='http://localhost:9292' \
+                           -e PACT_BROKER_USERNAME='pb_username' \
+                           -e PACT_BROKER_PASSWORD='pb_password' \
+                           --network host --rm pactfoundation/pact-cli:0.50.0.21 broker"
   }
 
   stages {
     stage('Get Latest Provider by Tag From Pact Broker') {
       steps {
         script {
-          env.PROVIDER_VERSION = sh(script: "sudo docker run ${PACT_DOCKER_CLI} describe-version -a provider-x -l ${PROVIDER_TAG} | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
+          env.PROVIDER_VERSION = sh(script: "${PACT_DOCKER_CLI} describe-version -a provider-x -l ${PROVIDER_TAG} | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
         }
         echo "Latest " + PROVIDER_TAG + " version: " + PROVIDER_VERSION
       }
