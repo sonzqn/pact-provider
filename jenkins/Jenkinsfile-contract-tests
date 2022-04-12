@@ -14,17 +14,22 @@ pipeline {
     string(name: 'PROVIDER_TAG', defaultValue: 'SIT_ENV', description: 'Tags to verify')
   }
 
+  environment {
+    SERVICE_NAME = "provider-java"
+    PACT_DOCKER_CLI = "sudo docker run \
+                           -e PACT_BROKER_BASE_URL='http://localhost:9292' \
+                           -e PACT_BROKER_USERNAME='pb_username' \
+                           -e PACT_BROKER_PASSWORD='pb_password' \
+                           --network host --rm pactfoundation/pact-cli:0.50.0.21 broker"
+  }
+
   stages {
-    stage ('Get Latest Provider by Tag From Pact Broker') {
+    stage('Get Latest Provider by Tag From Pact Broker') {
       steps {
-        sh 'curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.88.83/pact-1.88.83-linux-x86_64.tar.gz'
-        sh 'tar xzf pact-1.88.83-linux-x86_64.tar.gz'
-        dir('pact/bin') {
-          script {
-            env.PROVIDER_VERSION = sh(script: "./pact-broker describe-version -a provider-x -b http://localhost:9292 -l ${PROVIDER_TAG} | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
-          }
+        script {
+          env.PROVIDER_VERSION = sh(script: "${PACT_DOCKER_CLI} describe-version -a ${SERVICE_NAME} -l ${PROVIDER_TAG} | tail -1 | cut -f 1 -d \\|", returnStdout: true).trim()
         }
-        echo "Current " + PROVIDER_TAG + " version: " + PROVIDER_VERSION
+        echo "Latest " + PROVIDER_TAG + " version: " + PROVIDER_VERSION
       }
     }
     stage("Checkout Latest Provider (Tag)") {
@@ -33,14 +38,10 @@ pipeline {
       }
     }
 
-    stage ('Run Contract Tests') {
+    stage('Run Contract Tests') {
       steps {
-        sh "mvn clean verify " +
-                "-Dpact.provider.version=${PROVIDER_VERSION} " +
-                "-Dpact.verifier.publishResults=true " +
-                "-Dpactbroker.consumers=${params.pactConsumerName} " +
-                "-Dpactbroker.consumerversionselectors.tags=${params.pactConsumerTags} " +
-                "-Dpact.provider.tag=[C]${params.pactConsumerTags}"
+        sh "mvn clean verify -Dpactbroker.consumers=${params.pactConsumerName} -Dpactbroker.consumerversionselectors.tags=${params.pactConsumerTags} " +
+                "-Dpact.verifier.publishResults=true -Dpact.provider.version=${PROVIDER_VERSION} -Dpact.provider.tag=[C]${params.pactConsumerTags}"
       }
     }
   }
