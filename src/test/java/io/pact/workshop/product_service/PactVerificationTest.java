@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Provider("provider-x")
+@Provider("provider-java")
 @PactBroker
 public class PactVerificationTest {
     @LocalServerPort
@@ -73,7 +73,7 @@ public class PactVerificationTest {
 
     @State(value = "product with ID 10 exists", action = StateChangeAction.SETUP)
     void productExists(Map<String, Object> params) {
-        long productId = ((Number) params.get("id")).longValue();
+        long productId = (params.size() < 1) ? 10 : ((Number) params.get("id")).longValue();
         Optional<Product> product = productRepository.findById(productId);
         if (!product.isPresent()) {
             productRepository.save(new Product(productId, "Product", "TYPE", "001"));
