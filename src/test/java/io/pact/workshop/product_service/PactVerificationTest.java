@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Provider("provider-x")
+@Provider("provider-java")
 @PactBroker
 public class PactVerificationTest {
     @LocalServerPort

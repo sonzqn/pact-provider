@@ -13,7 +13,7 @@ pipeline {
   }
 
   environment {
-    SERVICE_NAME = "provider-x"
+    SERVICE_NAME = "provider-java"
     BRANCH_NAME = env.GIT_BRANCH.replace("origin/", "")
     PACT_URL = "http://localhost:9292"
     PACT_DOCKER_CLI = "sudo docker run \
