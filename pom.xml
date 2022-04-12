@@ -12,6 +12,7 @@
     <groupId>pact.ci.demo</groupId>
     <artifactId>pact-provider-java</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>pact-provider-java</name>
     <description>Provider Java for Pact Workshop</description>
 
     <properties>
