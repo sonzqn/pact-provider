@@ -9,7 +9,16 @@ pipeline {
   }
 
   parameters {
-    string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to build')
+    string(name: 'BRANCH', defaultValue: 'master', description: """Branch to build:
+    <ul>
+    <li>1. provider_remove_field</li>
+    <li>2. provider_change_field_name</li>
+    <li>3. provider_add_field</li>
+    <li>4. (does nothing - consumer_add_existing_field)</li>
+    <li>5. (does nothing - consumer_remove_field)</li>
+    <li>6. approve_new_field</li>
+    <li>7. approve_change_field_type</li>
+    </ul>""")
   }
 
   environment {
