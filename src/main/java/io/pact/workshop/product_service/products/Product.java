@@ -18,4 +18,5 @@ public class Product {
   private String type;
   private String tag;
   private String description;
+  private Long price;
 }

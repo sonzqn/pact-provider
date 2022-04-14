@@ -59,10 +59,10 @@ public class PactVerificationTest {
     void productsExists() {
         productRepository.deleteAll();
         productRepository.saveAll(Arrays.asList(
-                new Product(100L, "Test Product 1", "CREDIT_CARD", "CC_001", "description"),
-                new Product(200L, "Test Product 2", "CREDIT_CARD", "CC_002", "description"),
-                new Product(300L, "Test Product 3", "PERSONAL_LOAN", "PL_001", "description"),
-                new Product(400L, "Test Product 4", "SAVINGS", "SA_001", "description")
+                new Product(100L, "Test Product 1", "CREDIT_CARD", "CC_001", "description", 100L),
+                new Product(200L, "Test Product 2", "CREDIT_CARD", "CC_002", "description", 100L),
+                new Product(300L, "Test Product 3", "PERSONAL_LOAN", "PL_001", "description", 100L),
+                new Product(400L, "Test Product 4", "SAVINGS", "SA_001", "description", 100L)
         ));
     }
 
@@ -76,7 +76,7 @@ public class PactVerificationTest {
         long productId = (params.size() < 1) ? 10 : ((Number) params.get("id")).longValue();
         Optional<Product> product = productRepository.findById(productId);
         if (!product.isPresent()) {
-            productRepository.save(new Product(productId, "Product", "TYPE", "001", "description"));
+            productRepository.save(new Product(productId, "Product", "TYPE", "001", "description", 100L));
         }
     }
 
