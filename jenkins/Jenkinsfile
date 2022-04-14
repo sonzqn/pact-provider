@@ -9,12 +9,7 @@ pipeline {
   }
 
   parameters {
-    string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to build:
-    <ol>
-      <li>provider_remove_field</li>
-      <li>provider_change_field_name</li>
-      <li>provider_add_field</li>
-    </ol> ')
+    string(name: 'BRANCH', defaultValue: 'master', description: 'Branch to build:<ol><li>provider_remove_field</li><li>provider_change_field_name</li><li>provider_add_field</li></ol> ')
   }
 
   environment {
