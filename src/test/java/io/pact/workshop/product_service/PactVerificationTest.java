@@ -56,10 +56,10 @@ public class PactVerificationTest {
   void productsExists() {
     productRepository.deleteAll();
     productRepository.saveAll(Arrays.asList(
-      new Product(100L, "Test Product 1", "CREDIT_CARD", "v1", "CC_001"),
-      new Product(200L, "Test Product 2", "CREDIT_CARD", "v1", "CC_002"),
-      new Product(300L, "Test Product 3", "PERSONAL_LOAN", "v1", "PL_001"),
-      new Product(400L, "Test Product 4", "SAVINGS", "v1", "SA_001")
+      new Product(100L, "Test Product 1", "v1", "CC_001"),
+      new Product(200L, "Test Product 2", "v1", "CC_002"),
+      new Product(300L, "Test Product 3", "v1", "PL_001"),
+      new Product(400L, "Test Product 4", "v1", "SA_001")
     ));
   }
 
