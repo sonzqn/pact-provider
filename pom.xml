@@ -10,9 +10,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>pact.ci.demo</groupId>
-    <artifactId>pact-provider-x</artifactId>
+    <artifactId>pact-provider-java</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <description>Provider X for Pact Workshop</description>
+    <name>pact-provider-java</name>
+    <description>Provider Java for Pact Workshop</description>
 
     <properties>
         <java.version>1.8</java.version>
