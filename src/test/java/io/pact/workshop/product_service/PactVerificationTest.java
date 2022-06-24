@@ -16,32 +16,31 @@ import java.nio.ByteBuffer;
 import java.util.Base64;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Provider("provider-x")
+@Provider("provider-java")
 @PactBroker
 public class PactVerificationTest {
-  @LocalServerPort
-  private int port;
+    @LocalServerPort
+    private int port;
 
-  @BeforeEach
-  void setup(PactVerificationContext context) {
-    context.setTarget(new HttpTestTarget("localhost", port));
-  }
-
-  @TestTemplate
-  @ExtendWith(PactVerificationSpringProvider.class)
-  void pactVerificationTestTemplate(PactVerificationContext context, HttpRequest request) {
-    // WARNING: Do not modify anything else on the request, because you could invalidate the contract
-    if (request.containsHeader("Authorization")) {
-      request.setHeader("Authorization", "Bearer " + generateToken());
+    @BeforeEach
+    void setup(PactVerificationContext context) {
+        context.setTarget(new HttpTestTarget("localhost", port));
     }
-    context.verifyInteraction();
-  }
 
-  private static String generateToken() {
-    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-    buffer.putLong(System.currentTimeMillis());
-    return Base64.getEncoder().encodeToString(buffer.array());
-  }
+    @TestTemplate
+    @ExtendWith(PactVerificationSpringProvider.class)
+    void pactVerificationTestTemplate(PactVerificationContext context, HttpRequest request) {
+        // WARNING: Do not modify anything else on the request, because you could invalidate the contract
+        if (request.containsHeader("Authorization")) {
+            request.setHeader("Authorization", "Bearer " + generateToken());
+        }
+        context.verifyInteraction();
+    }
 
+    private static String generateToken() {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(System.currentTimeMillis());
+        return Base64.getEncoder().encodeToString(buffer.array());
+    }
 
 }
